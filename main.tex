@@ -188,6 +188,7 @@ F_{rms}^{2} = \frac{\int _{0} ^ {\infty}{(F-F_{mean})^{2} p(F) dF}}{\int _{0} ^ 
 Finally, since for a Gaussian distribution the area contained between $\mu \pm \sigma$ is $95.5 \%$ of the total area under the curve, for the truncated Gaussian we define the  $2 \sigma$ level as:
 
 \begin{equation}
+\label{eq:sigma}
 \int _{F_{2 \sigma}} ^{\infty} {p(F)dF} = 0.05 * \int _{0} ^{\infty} {p(F) dF} 
 \end{equation}
 
@@ -203,27 +204,53 @@ the following often used integrals of Gaussian distributions :
 - cumulative density function, that is an area under the Gaussian distribution from $-\infty$ to $x_{0}$ :
 
 \begin{equation}
-\cdf(x_{0}) = \int_{-\infty}^{x_{0}}{\mathcal{N}(\mu,\sigma)dx} = \int_{-\infty}^{x_{0}}{\frac{\exp{(x-\mu)^{2} / 2\sigma^{2}}}{\sqrt{2\pi\sigma^{2}}} dx}
+\cdf(x_{0}, \mu, \sigma) = \int_{-\infty}^{x_{0}}{\mathcal{N}(\mu,\sigma)dx} = \int_{-\infty}^{x_{0}}{\frac{\exp{(x-\mu)^{2} / 2\sigma^{2}}}{\sqrt{2\pi\sigma^{2}}} dx}
 \end{equation}
 
-- point percent function , that is an inverse of the cumulative density function:  if  $A = \cdf(x_{0})$, then  $x_{0} = \ppf(A)$
+
+- point percent function , that is an inverse of the cumulative density function of the unit Gaussian:  if  $A = \cdf(x_{0}, 1, 0)$, then  $x_{0} = \ppf(A)$
 
 - survival function (also known  as the complementary cumulative distribution function), that is an area under a Gaussian distribution from $x_{0}$ to $\infty$
 
 \begin{multline}
-\sf(x_{0}) =  \int_{x_{0}}^{\infty}{\mathcal{N}(\mu,\sigma)dx} =  \int_{-\infty}^{\infty}{\mathcal{N}(\mu,\sigma)dx} -  \int_{-\infty}^{x_{0}}{\mathcal{N}(\mu,\sigma)dx} = \\
+\sf(x_{0}, \mu, \sigma) =  \int_{x_{0}}^{\infty}{\mathcal{N}(\mu,\sigma)dx} =  \int_{-\infty}^{\infty}{\mathcal{N}(\mu,\sigma)dx} -  \int_{-\infty}^{x_{0}}{\mathcal{N}(\mu,\sigma)dx} = \\
 1 - \cdf(x_{0})
 \end{multline}
 
-In our faint flux treatment  we assume that each flux measurement has an associated Gaussian likelihood, and that the width and mean of the likelihood correspond 
-to the measured flux and the measurement error respectively. 
+Note that we use these functions here to employ the \verb|scipy.stats.norm| methods of \verb|cdf|, \verb|sf|, and other functions that are related to integrating a Normal distribution.  Therefore we reduce all expressions by appropriate substitutions and translation, to arrive at the integration of a unit Gaussian :
+
+\begin{equation}
+\mathcal{N}(0,1) = \frac{1}{\sqrt{2\pi}} e^{-x^{2}/2}dx
+\end{equation}
+
+Therefore we use a shorthand notation :  
+\begin{equation}
+\sf(x_{0}) = \sf(x_{0},1,0) =  \int_{x_{0}}^{\infty}{\frac{1}{\sqrt{2\pi}} e^{-x^{2}/2}dx}
+\end{equation}
+
+ and likewise for
+\begin{equation} 
+ \cdf(x_{0}) =  \int_{-\infty}^{x_{0}}{   \frac{1}{\sqrt{2\pi}} e^{-x^{2}/2} dx} 
+\end{equation}
+
+In our faint flux treatment  we assume that each flux measurement has an associated Gaussian likelihood, and that the width and mean of the likelihood correspond to the measured flux and the measurement error respectively. 
+
+
+\begin{figure}
+ \includegraphics[width=\columnwidth]{figs/faintPipeline_F_x_z_spaces.pdf}
+ \caption{The three panels illustrate three main steps taken in expressing  the analytic expressions for mean, median, RMS of the flux  likelihood distribution as functions of a unit Gaussian. The top panels shows the flux space, where  the  likelihood for flux measurement is centered on the  reported value  of flux  $F_{obs}$, with a width of the reported error $\sigma_{F}$. The middle panel shows the same expressed in the S/N space, called x-space here,  since  $x = S/N =  F / \sigma_{F} $.  Here the likelihood is a unit Gaussian centered on $x_{obs}$.   The bottom panel depicts the z-space, which is the translation of x-space by $x_{obs}$, to allow calculations using unit Gaussian functions. In this space the likelihood is a unit Gaussian, centered on 0. In each panel we shade in red the non-zero flux portion of the likelihood, which is the basis for all calculations here (assuming flat prior).  On the bottom panel we also shade the left part , to illustrate the meaning of the cdf and sf functions as calculated for a unit Gaussian.  }
+ \label{fig:three_panels}
+\end{figure}
+
+
+
 
 For a source where signal-to-noise < 2 (in our case, ratio of  flux to error), we remove the negative portion of the likelihood, since there is no physical likelihood that a flux would be negative.
 Thus for mean, we integrate from $0$ instead of $-\infty$ : 
 
 
 \begin{equation}
-F_{mean} = \frac{\int _{0} ^ {\infty}{F p(F) dF}}{\int _{0} ^ {\infty}{p(F) dF}} = I_{0} / I_{1}
+F_{mean} = \frac{\int _{0} ^ {\infty}{F p(F) dF}}{\int _{0} ^ {\infty}{p(F) dF}} = I_{M} / I_{N}
 \end{equation}
 
 where we need to normalize by the integral over the positive part of the Gaussian likelihood. 
@@ -231,13 +258,20 @@ where we need to normalize by the integral over the positive part of the Gaussia
 We evaluate 
 
 \begin{multline}
-I_{0}= \int _{0} ^ {\infty} {\frac{F}{\sqrt{2\pi\sigma_{F}^{2}}} \exp{\left(-\frac{(F-F_{obs})^{2}}{2\sigma_{F}^{2}}\right)} }dF = \\  \frac{\sigma_{F}}{\sqrt{2 \pi}} \exp{\left(- \frac{F_{obs}^{2}}{2\sigma_{F}^{2}} \right)} + F_{obs} \sf{\left( \frac{-F_{obs}}{\sigma_{F}}\right)}
+I_{M}= \int _{0} ^ {\infty} {\frac{F}{\sqrt{2\pi\sigma_{F}^{2}}} \exp{\left(-\frac{(F-F_{obs})^{2}}{2\sigma_{F}^{2}}\right)} }dF = \\  \frac{\sigma_{F}}{\sqrt{2 \pi}} \exp{\left(- \frac{F_{obs}^{2}}{2\sigma_{F}^{2}} \right)} + F_{obs} \sf{\left( \frac{-F_{obs}}{\sigma_{F}}\right)}
 \end{multline}
 
 and 
 
+\begin{multline}
+I_{N} = \int _{0} ^ {\infty}{ p(F) dF} = \int _{0} ^ {\infty} {\frac{1}{\sqrt{2\pi\sigma_{F}^{2}}}     \exp{\left(-\frac{(F-F_{obs})^{2}}{2\sigma_{F}^{2}}\right)} } dF=  \\  
+\int _{0} ^ {\infty} {\frac{1}{\sqrt{2\pi}}     \exp{\left(-\frac{(x-x_{obs})^{2}}{2}\right)} } dx
+\end{multline}
+
+where we subsituted $F / \sigma_{F} = x$, and $F_{obs} / \sigma_{F} = x_{obs}$. Now, apply translation  $z = x - x_{obs} $  : 
+
 \begin{equation}
-I_{1} = \int _{0} ^ {\infty}{ p(F) dF} = \int _{0} ^ {\infty} {\frac{\exp{\left(-\frac{(F-F_{obs})^{2}}{2\sigma_{F}^{2}}\right)} }{\sqrt{2\pi\sigma_{F}^{2}}} }dF = \sf{(-F_{obs} / \sigma_{F})}
+I_{N} = \int _{-x_{obs}} ^ {\infty} {\frac{1}{\sqrt{2\pi}}     \exp{\left(-\frac{z^{2}}{2}\right)} } dz =   \sf{(-x_{obs})}
 \end{equation}
 
 so that 
@@ -272,6 +306,7 @@ In $z$-space, the median from
 becomes 
 
 \begin{equation}
+\label{eq:median}
 \int_{x_{0}}^{z_{med}}{p(z)dz} = \int_{z_{med}}^{\infty}{p(z)dz}
 \end{equation}
 
@@ -279,42 +314,47 @@ with  $x_{0}=-x_{obs}$
 
 \bigskip
 
-We evaluate $z_{med}$ analytically  - the right hand side is the survival function  : 
+We find  $z_{med}$ analytically  - the right hand side of Eq.~\ref{eq:median} is the survival function  : 
 
 \begin{equation}
-\int_{z_{med}}^{\infty}{p(z)dz} = \sf(z_{med})
+RHS = \int_{z_{med}}^{\infty}{p(z)dz} = \sf(z_{med})
 \end{equation}
 
 and the left hand side, assuming that the median $z_{med} > x_{0}$, is :
 
 \begin{multline}
-\int_{x_{0}}^{z_{med}}{p(z)dz} = \int_{-\infty}^{z_{med}}{p(z)dz} - \int_{-\infty}^{x_{0}}{p(z)dz} = \cdf(z_{med}) - \cdf(x_{0})
+LHS = \int_{x_{0}}^{z_{med}}{p(z)dz} = \int_{-\infty}^{z_{med}}{p(z)dz} - \int_{-\infty}^{x_{0}}{p(z)dz} = \cdf(z_{med}) - \cdf(x_{0})
+\end{multline}
+
+Comparing left and right hand sides : 
+
+\begin{multline}
+\cdf(z_{med}) - \cdf(x_{0}) = \sf(z_{med}) \\
+\cdf(z_{med}) - \cdf(x_{0}) = 1 - \cdf(z_{med}) \\
+2 \cdf(z_{med}) = 1 + \cdf(x_{0}) 
 \end{multline}
 
 Rearranging, and using the percent point function ($\ppf$)  we find:
 
+
 \begin{equation}
-z_{med} = \ppf \left( \frac{1+\cdf(x_{0})}{2} \right)
+\therefore z_{med} = \cdf^{-1} \left(  \frac{1 + \cdf(x_{0})   }{2}   \right) = \ppf \left(  \frac{1 + \cdf(x_{0})   }{2}   \right)
 \end{equation}
 
 and transforming back to $F$ space: 
 
 \begin{equation}
-F_{med} = F_{obs} + \sigma_{F} \, \ppf \left( \frac{1+\cdf(x_{0})}{2} \right)
+F_{med} = F_{obs} + \sigma_{F} \, \ppf \left( \frac{1+\cdf( - F_{obs} / \sigma_{F})}{2} \right)
 \end{equation}
 
-with $x_{0}$ and $x_{obs}$ as above.  We also normalize this expression by $\int _{0} ^ {\infty}{ p(F) dF}$ and $\sigma_{F}$:
+
+For the calculation of $2 \sigma$ level , as in Eq.~\ref{eq:sigma}, we look for a point such that the area contained under the likelihood between that point and infinity (B)  is 0.05 of the area as calculated under the curve from 0 to infinity (A) . In other words,  $\text{B} = 0.05 \text{A}$  . Since we use unit Gaussian likelihood, both areas can be expressed as the survival functions:  $\text{A}= \sf (x_{0})$, and  $\text{B} = \sf(z_{B})$, i.e.  
 
 \begin{equation}
-x_{med}^{norm} = x_{obs}
+ \sf(z_{B}) = 0.05  \sf (x_{0})
 \end{equation}
 
-
-\bigskip
-
-In $z$  space , the $2\sigma$ areas  $A$ and $B$ are :
-
-$\text{A} = \sf(x_{0})$ and $\text{B} = \sf(z_{B})$, so to find  $z_{B}$ we use the  inverse survival function $\isf$ : $z_{B} = \isf(0.05 \text{A})$. Thus transforming back to $F$-space we have:
+so to find  $z_{B}$ we use the  inverse survival function $\isf$ : $z_{B} = \isf(0.05 \text{A})$. Transforming back to $F$-space we have:
 
 \begin{equation}
 F_{2\sigma} = F_{obs} + \sigma_{F} \left(\, \isf (\, 0.05 \sf (x_{0})  \right)
@@ -322,10 +362,11 @@ F_{2\sigma} = F_{obs} + \sigma_{F} \left(\, \isf (\, 0.05 \sf (x_{0})  \right)
 
 \bigskip
 
-We also find the root-mean-square:
+Finally, we find the root-mean-square:
 
 \begin{equation}
-F_{rms}^{2} = \frac{\int _{0} ^ {\infty}{(F-F_{mean})^{2} p(F) dF}}{\int _{0} ^ {\infty}{p(F) dF}} = I_{0} / I_{1}
+\label{eq:rms}
+F_{rms}^{2} = \frac{\int _{0} ^ {\infty}{(F-F_{mean})^{2} p(F) dF}}{\int _{0} ^ {\infty}{p(F) dF}} = I_{R} / I_{N}
 \end{equation}
 
 this can be evaluated by numerical integration, scaling by $\sigma_{F}$, so that $x_{mean} = F_{mean} / \sigma_{F}$, $x_{obs} = F_{obs} / \sigma_{F}$ : 
@@ -334,16 +375,16 @@ this can be evaluated by numerical integration, scaling by $\sigma_{F}$, so that
 F_{rms}^{2} = \frac{\sigma_{F}^{2} \int_{0}^{\infty} {(x-x_{mean})^{2} exp(-(x-x_{obs})^{2} / 2 ) dx }}  {\int_{0}^{\infty} {exp(-(x-x_{obs})^{2} / 2 ) dx }}
 \end{equation}
 
-We derived analytical expression for rms :
+based on  Eq.~\ref{eq:rms} we derive analytical expression for rms :
 \begin{equation}
-x_{rms} = \left(\frac{I_{0}}{I_{1} \sigma_{F}^{2}}\right)^{1/2}
+x_{rms} =  \frac{F_{rms}}{\sigma_{F}} =   \left(\frac{I_{R}}{I_{N} \sigma_{F}^{2}}\right)^{1/2}
 \end{equation}
 
-where $I_{1}$ is our normalization , as in calculation of $F_{mean}$, and as 
+where $I_{N}$ is our normalization , as in calculation of $F_{mean}$, and as 
 
 
 \begin{equation}
-\frac{I_{0}}{ \sigma_{F}^{2}} = \frac{1}{2} \erf\left(\frac{x_{obs}}{\sqrt{2}}\right) + \frac{1}{\sqrt{2\pi}} e^{(-x_{obs}^{2} / 2)} (2 \Delta x - x_{obs}) + (\Delta x)^{2} \sf(-x_{obs})
+\frac{I_{R}}{ \sigma_{F}^{2}} = \frac{1}{2} \erf\left(\frac{x_{obs}}{\sqrt{2}}\right) + \frac{1}{\sqrt{2\pi}} e^{(-x_{obs}^{2} / 2)} (2 \Delta x - x_{obs}) + (\Delta x)^{2} \sf(-x_{obs})
 \end{equation}
 with  $\Delta x = x_{obs} - x_{mean}$
 
