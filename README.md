@@ -8,6 +8,6 @@ Research    |   Notebook
 ------------|------------
 Illustration of faint Pipeline  | [05.2017_redoing_variability_metrics.ipynb](https://github.com/suberlak/SDSS_S82_FP_research/blob/master/code/05.2017_redoing_variability_metrics.ipynb) 
 Analytical vs direct integration | [Faint_analytical_vs_direct_integration.ipynb](https://github.com/suberlak/SDSS_S82_FP_research/blob/master/code/Faint_analytical_vs_direct_integration.ipynb)
-iPTF Poster 2016 | [Faint_iPTF_poster_S13Agg_simulated_LC.ipynb] (https://github.com/suberlak/SDSS_S82_FP_research/blob/master/code/Faint_iPTF_poster_S13Agg_simulated_LC.ipynb)
-iPTF Poster 2016 v.2 | [Faint_pipeline_iPTF_poster.ipynb] (https://github.com/suberlak/SDSS_S82_FP_research/blob/master/code/Faint_pipeline_iPTF_poster.ipynb)
+iPTF Poster 2016 | [Faint_iPTF_poster_S13Agg_simulated_LC.ipynb](https://github.com/suberlak/SDSS_S82_FP_research/blob/master/code/Faint_iPTF_poster_S13Agg_simulated_LC.ipynb)
+iPTF Poster 2016 v.2 | [Faint_pipeline_iPTF_poster.ipynb](https://github.com/suberlak/SDSS_S82_FP_research/blob/master/code/Faint_pipeline_iPTF_poster.ipynb)
 
